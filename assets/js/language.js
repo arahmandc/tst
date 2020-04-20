@@ -34,20 +34,39 @@ var Language = {
         });
     },
 
+    _links: {
+        'GitHub':
+            ['https://github.com/jeanropke/RDR2CollectorsMap/issues', 'GitHub'],
+        'Discord':
+            ['https://discord.gg/WWru8cP', 'Discord'],
+        'int.nazar.link':
+            ['https://twitter.com/MadamNazarIO', '@MadamNazarIO'],
+        'int.random_spot.link':
+            ['https://github.com/jeanropke/RDR2CollectorsMap/wiki/Random-Item-Possible-Loot'],
+    },
+
+    _externalLink: function (key) {
+        'use strict';
+        const [url, text] = Language._links[key];
+        return `<a href="${url}" target="_blank">${text ? `${text}</a>` : ''}`;
+    },
+
     get: function (transKey, optional) {
         'use strict';
         let translation = false;
 
-        if (transKey === 'GitHub') {
-            translation = '<a href="https://github.com/jeanropke/RDR2CollectorsMap/issues" target="_blank">GitHub</a>';
-        } else if (transKey === 'Discord') {
-            translation = '<a href="https://discord.gg/WWru8cP" target="_blank">Discord</a>';
-        } else if (transKey === 'int.random_spot.link') {
-            translation = '<a href="https://github.com/jeanropke/RDR2CollectorsMap/wiki/Random-Item-Possible-Loot" target="_blank">';
+        if (Settings.isDebugEnabled) optional = false;
+
+        if (Language._links.propertyIsEnumerable(transKey)) {
+            translation = Language._externalLink(transKey);
         } else if (transKey === 'int.end.link') {
             translation = '</a>';
         } else if (transKey === 'collection') {
             transKey = `weekly.desc.${weeklySetData.current}`;
+        } else if (transKey === 'weekly_flavor') {
+            transKey = `weekly.flavor.${weeklySetData.current}`;
+        } else if (['count', 'max'].includes(transKey)) {
+            return `{${transKey}}`;
         }
 
         translation =
@@ -56,8 +75,8 @@ var Language = {
             Language.data.en[transKey] ||
             (optional ? '' : transKey);
 
-        return translation.replace(/\{([\w.]+)\}/g,
-            (full, key) => this.get(key, true) || `{${key}}`);
+        return translation.replace(/\{([\w.]+)\}/g, (full, key) =>
+            this.get(key, true) || `{${key}}`);
     },
 
     translateDom: function (context) {
